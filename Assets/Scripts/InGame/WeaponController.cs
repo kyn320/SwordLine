@@ -34,7 +34,7 @@ public class WeaponController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-
+            weaponBehaviour.Attack();
         }
 
 

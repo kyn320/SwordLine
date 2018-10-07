@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Astar2DPathFinding.Mika;
 
-public class EntityAI : MonoBehaviour {
+public class EntityAI : MonoBehaviour
+{
+    private CountPath countPath;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    protected virtual void Awake()
+    {
+        countPath = GetComponent<CountPath>();
+    }
+
+}
+
+public enum EntityState
+{
+    Idle,
+    Move
 }

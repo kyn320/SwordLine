@@ -7,6 +7,7 @@ public class WeaponBehaviour : MonoBehaviour
     public Weapon weapon;
 
     public GameObject rendererObject;
+    Animator ani;
 
     public Prop prop;
 
@@ -17,9 +18,12 @@ public class WeaponBehaviour : MonoBehaviour
 
     Quaternion rotVec;
 
+    public int attackCombo = 0;
+
     private void Awake()
     {
         weaponCollider = GetComponent<Collider2D>();
+        ani = rendererObject.GetComponent<Animator>();
     }
 
 
@@ -41,7 +45,9 @@ public class WeaponBehaviour : MonoBehaviour
 
     public void Attack()
     {
-        weaponCollider.enabled = true;
+        //weaponCollider.enabled = true;
+        ani.SetInteger("Combo", ++attackCombo);
+        ani.SetTrigger("Attack");
     }
 
 

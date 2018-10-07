@@ -14,7 +14,7 @@ namespace Astar2DPathFinding.Mika {
         private bool readyToCountPath = true;
 
 
-        public float movespeed;
+        public float moveSpeed;
 
         //Interval time between pathfinding
         [SerializeField]
@@ -117,7 +117,7 @@ namespace Astar2DPathFinding.Mika {
                     float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
                     transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-                    startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, pathArray[i], Time.deltaTime * movespeed);
+                    startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, pathArray[i], Time.deltaTime * moveSpeed);
                     //Vector2 direction = (pathArray[i] - startPos.transform.position).normalized * 100;
                     //startPos.GetComponent<Rigidbody2D>().velocity = direction * Time.deltaTime * movespeed;
 
@@ -132,7 +132,7 @@ namespace Astar2DPathFinding.Mika {
                 float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
-                startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, endPos, Time.deltaTime * movespeed);
+                startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, endPos, Time.deltaTime * moveSpeed);
                 //Vector2 direction = (endPosition - startPos.transform.position).normalized * 100; ;
                 //startPos.GetComponent<Rigidbody2D>().velocity = direction * Time.deltaTime * movespeed;
                 yield return null;
