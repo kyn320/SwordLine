@@ -7,8 +7,9 @@ public class PlayerBehaviour : MonoBehaviour
 
     public PlayerState state;
 
-    PlayerController controller;
-    Rigidbody2D ri;
+    private PlayerController controller;
+    private Rigidbody2D ri;
+    private Animator ani;
 
     public int hp;
     public float attackDamage;
@@ -18,12 +19,14 @@ public class PlayerBehaviour : MonoBehaviour
     public Vector3 dir;
     public Vector3 lookDir;
 
+    public GameObject playerRenderer;
     public GameObject afterImageEffect;
 
     private void Awake()
     {
         controller = GetComponent<PlayerController>();
         ri = GetComponent<Rigidbody2D>();
+        ani = playerRenderer.GetComponent<Animator>();
     }
 
     private void FixedUpdate()
@@ -33,12 +36,34 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Move()
     {
-        if (state != PlayerState.Stand && state != PlayerState.Move)
+        if (state != PlayerState.Idle && state != PlayerState.Move)
+        {
+            ani.SetBool("Move", false);
             return;
+        }
 
         state = PlayerState.Move;
-
+        ani.SetBool("Move", true);
         ri.velocity = dir * moveSpeed;
+    }
+
+    public void UpdateState(PlayerState _state, bool _isOn = true)
+    {
+        switch (_state)
+        {
+            case PlayerState.Attack:
+                if (_isOn)
+                {
+                    state = PlayerState.Attack;
+                }
+                else
+                {
+                    state = PlayerState.Idle;
+                }
+                ani.SetBool("Attack", _isOn);
+                break;
+        }
+
     }
 
     #region HP 제어
@@ -50,7 +75,7 @@ public class PlayerBehaviour : MonoBehaviour
     public void Damage(int _value)
     {
         hp -= _value;
-
+        ani.SetTrigger("NuckBack");
         if (hp < 1)
             Death();
     }
@@ -58,6 +83,7 @@ public class PlayerBehaviour : MonoBehaviour
     public void Death()
     {
         state = PlayerState.Death;
+        ani.SetTrigger("Death");
         //TODO :: 사망 판정 구현
 
     }
@@ -66,14 +92,20 @@ public class PlayerBehaviour : MonoBehaviour
     public void SetDirection(Vector3 _dir)
     {
         if (_dir != Vector3.zero)
+        {
             lookDir = _dir;
+            ani.SetFloat("X", lookDir.x);
+            ani.SetFloat("Y", lookDir.y);
+        }
+        else
+        {
+            state = PlayerState.Idle;
+            ani.SetBool("Move", false);
+        }
 
         dir = _dir;
 
     }
-
-
-
 
     #region 회피 효과
     public void Evasion(float _time)
@@ -93,6 +125,7 @@ public class PlayerBehaviour : MonoBehaviour
     IEnumerator EvasionEffect(float _time)
     {
         afterImageEffect.SetActive(true);
+        ani.SetBool("Dash", true);
         float time = _time;
 
         while (time >= 0 && state == PlayerState.Evasion)
@@ -105,7 +138,8 @@ public class PlayerBehaviour : MonoBehaviour
         ri.velocity = Vector3.zero;
         yield return new WaitForSeconds(0.2f);
         controller.isInput = true;
-        state = PlayerState.Stand;
+        ani.SetBool("Dash", false);
+        state = PlayerState.Idle;
         evasionEffect = null;
 
     }
@@ -115,7 +149,19 @@ public class PlayerBehaviour : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D _collision)
     {
         if (state == PlayerState.Evasion)
-            state = PlayerState.Stand;
+        {
+            if (evasionEffect != null)
+            {
+                StopCoroutine(evasionEffect);
+                evasionEffect = null;
+            }
+
+            afterImageEffect.SetActive(false);
+            ri.velocity = Vector3.zero;
+            controller.isInput = true;
+            ani.SetBool("Dash", false);
+            state = PlayerState.Idle;
+        }
     }
 
 
@@ -124,12 +170,17 @@ public class PlayerBehaviour : MonoBehaviour
         return (transform.position - _pos).normalized;
     }
 
+    public Animator GetAnimator()
+    {
+        return ani;
+    }
+
 }
 
 [System.Serializable]
 public enum PlayerState
 {
-    Stand,
+    Idle,
     Move,
     Attack,
     Evasion,

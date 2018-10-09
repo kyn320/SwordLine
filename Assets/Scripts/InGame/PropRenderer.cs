@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class PropRenderer : MonoBehaviour
 {
-    public SpriteRenderer spriteRenderer;
+    private SpriteRenderer spriteRenderer;
+
+    private void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     public void SetPropColor(Color _color)
     {

@@ -19,12 +19,17 @@ public class WeaponBehaviour : MonoBehaviour
 
     private Collider2D weaponCollider;
 
-    Quaternion rotVec;
+    Quaternion rotQuaternion;
+    Vector3 rotVector;
 
-    public int attackCombo = 0;
     public float attackAnimationCurrentTime = 0;
     public float[] attackAnimationTime;
 
+    public int combo = 0;
+    public int maxCombo = 2;
+
+    public float comboWaitTime = 0.5f;
+    public float comboWaitCurrentTime;
 
     public float power = 10f;
 
@@ -57,13 +62,14 @@ public class WeaponBehaviour : MonoBehaviour
 
     void Rotate()
     {
-        transform.localRotation = rotVec;
+        transform.localRotation = rotQuaternion;
     }
 
     public void SetRotate(Vector3 _rot)
     {
+        rotVector = _rot;
         float degree = Mathf.Atan2(_rot.y, _rot.x) * Mathf.Rad2Deg;
-        rotVec = Quaternion.Euler(0, 0, degree);
+        rotQuaternion = Quaternion.Euler(0, 0, degree);
     }
 
     public void Attack()
@@ -72,17 +78,25 @@ public class WeaponBehaviour : MonoBehaviour
             return;
 
         isAttack = true;
-        attackCombo = 1;
+
+        ++combo;
+
+        if (combo == maxCombo +1)
+            combo = 1;
+
         weaponCollider.enabled = true;
-        ani.SetInteger("Combo", attackCombo);
-        attackAnimationCurrentTime = attackAnimationTime[attackCombo - 1];
+        ani.SetInteger("Combo", combo);
+        attackAnimationCurrentTime = attackAnimationTime[combo - 1];
         ani.SetTrigger("Attack");
+        player.SetDirection(rotVector);
+        player.UpdateState(PlayerState.Attack, true);
+        player.GetAnimator().SetInteger("Combo", combo);
         CameraController.instance.Shake(3, 0.3f, 1f);
         if (attackWaitTimer != null)
         {
             StopCoroutine(attackWaitTimer);
         }
-        StartCoroutine(AttackWaitTimer());
+        attackWaitTimer = StartCoroutine(AttackWaitTimer());
     }
 
     Coroutine attackWaitTimer = null;
@@ -95,12 +109,37 @@ public class WeaponBehaviour : MonoBehaviour
             yield return null;
         }
 
+        if (attackComboWaitTimer != null)
+        {
+            StopCoroutine(attackComboWaitTimer);
+        }
+        attackComboWaitTimer = StartCoroutine(AttackComboWaitTimer());
 
+        player.UpdateState(PlayerState.Attack, false);
+        player.GetAnimator().SetInteger("Combo", 0);
         attackAnimationCurrentTime = 0f;
         weaponCollider.enabled = false;
         isAttack = false;
 
     }
+
+    Coroutine attackComboWaitTimer = null;
+
+    IEnumerator AttackComboWaitTimer()
+    {
+        comboWaitCurrentTime = comboWaitTime;
+
+        while (comboWaitCurrentTime > 0)
+        {
+            comboWaitCurrentTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        combo = 0;
+        comboWaitCurrentTime = 0f;
+
+    }
+
 
     public void Damage(GameObject _monster)
     {
