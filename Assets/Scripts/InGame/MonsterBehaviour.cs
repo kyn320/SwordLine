@@ -2,10 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MonsterBehaviour : MonoBehaviour {
+public class MonsterBehaviour : MonoBehaviour
+{
 
     public int hp;
     public MonsterState state;
+
+
+    private MonsterAI ai;
+    private Rigidbody2D ri;
+
+
+    private void Awake()
+    {
+        ri = GetComponent<Rigidbody2D>();
+        ai = GetComponent<MonsterAI>();
+    }
 
 
     #region HP 제어
@@ -29,6 +41,39 @@ public class MonsterBehaviour : MonoBehaviour {
 
     }
     #endregion
+
+
+    public void KnockBack(float _power, Vector3 _dir)
+    {
+
+        if (knockBack != null)
+        {
+            StopCoroutine(knockBack);
+        }
+
+        knockBack = StartCoroutine(KnockBackEffect(_power, _dir));
+
+    }
+
+    Coroutine knockBack = null;
+
+    IEnumerator KnockBackEffect(float _power, Vector3 _dir)
+    {
+        ri.velocity = Vector2.zero;
+        ri.drag = _power * 0.7f;
+        ri.AddForce(_power * _dir, ForceMode2D.Impulse);
+
+        while (ri.velocity.sqrMagnitude > 0.1f)
+        {
+            yield return null;
+        }
+
+        ri.drag = 0f;
+        ri.velocity = Vector2.zero;
+        knockBack = null;
+
+    }
+
 }
 
 public enum MonsterState

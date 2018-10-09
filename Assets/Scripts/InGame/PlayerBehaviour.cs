@@ -118,6 +118,12 @@ public class PlayerBehaviour : MonoBehaviour
             state = PlayerState.Stand;
     }
 
+
+    public Vector3 GetDirectionToVector3(Vector3 _pos)
+    {
+        return (transform.position - _pos).normalized;
+    }
+
 }
 
 [System.Serializable]

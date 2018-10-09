@@ -2,31 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraShake : MonoBehaviour {
-
-    public Transform parentTransform;
+public class CameraShake : MonoBehaviour
+{
 
     public float shakeAmount;
-    public float shakeTime;
     public float shakeLerpTime;
 
     float shakePercent;
     float shakeDuration;
 
-    Vector3 standardPostion;
 
-    void Awake()
-    {
-        standardPostion = parentTransform.position;
-    }
-
-    public void ShakeCam()
+    public void ShakeCam(float _amount, float _time, float _lerpTime)
     {
         if (shakeCoroutine != null)
             StopCoroutine(shakeCoroutine);
 
+        shakeAmount = _amount;
+        shakeDuration = _time;
+        shakeLerpTime = _lerpTime;
 
-        shakeDuration = shakeTime;
         shakeCoroutine = StartCoroutine(Shake());
     }
 
@@ -44,14 +38,14 @@ public class CameraShake : MonoBehaviour {
             shakePercent = shakeAmount * shakePercent;
             shakeDuration -= Time.deltaTime;
 
-            parentTransform.position = Vector3.Lerp(parentTransform.position, amountPositionVec, Time.deltaTime * shakeLerpTime);
-            parentTransform.localRotation = Quaternion.Lerp(parentTransform.localRotation, Quaternion.Euler(amountRotationVec), Time.deltaTime * shakeLerpTime);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, amountPositionVec, Time.deltaTime * shakeLerpTime);
+            transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.Euler(amountRotationVec), Time.deltaTime * shakeLerpTime);
 
             yield return null;
         }
 
-        parentTransform.position = standardPostion;
-        parentTransform.localRotation = Quaternion.identity;
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
         shakeCoroutine = null;
     }
 }

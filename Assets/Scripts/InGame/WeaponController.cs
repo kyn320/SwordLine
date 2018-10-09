@@ -27,6 +27,9 @@ public class WeaponController : MonoBehaviour
 
     private void Update()
     {
+        if (weaponBehaviour.isAttack)
+            return;
+
         Vector3 mousePosition = Input.mousePosition;
         mousePosition.z = target.position.z - Camera.main.transform.position.z;
         Vector3 rot = Camera.main.ScreenToWorldPoint(mousePosition) - target.position;
@@ -37,10 +40,6 @@ public class WeaponController : MonoBehaviour
             weaponBehaviour.Attack();
         }
 
-
     }
-
-
-
 
 }
