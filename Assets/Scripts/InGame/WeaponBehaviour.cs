@@ -12,8 +12,6 @@ public class WeaponBehaviour : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Animator ani;
 
-    public Prop prop;
-
     // (min  = 0) ~ (max = 3)
     public int propLevel;
 
@@ -48,13 +46,7 @@ public class WeaponBehaviour : MonoBehaviour
         spriteRenderer = rendererObject.GetComponent<SpriteRenderer>();
         ani = rendererObject.GetComponent<Animator>();
     }
-
-    private void Update()
-    {
-        spriteRenderer.color = prop.color;
-    }
-
-
+        
     private void FixedUpdate()
     {
         Rotate();
@@ -88,7 +80,7 @@ public class WeaponBehaviour : MonoBehaviour
         ani.SetInteger("Combo", combo);
         attackAnimationCurrentTime = attackAnimationTime[combo - 1];
         ani.SetTrigger("Attack");
-        player.SetDirection(rotVector);
+        player.SetDirection(rotVector.ConvertToRawVector3());
         player.UpdateState(PlayerState.Attack, true);
         player.GetAnimator().SetInteger("Combo", combo);
         CameraController.instance.Shake(3, 0.3f, 1f);

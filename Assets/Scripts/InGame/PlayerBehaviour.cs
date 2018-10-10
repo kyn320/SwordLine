@@ -95,6 +95,12 @@ public class PlayerBehaviour : MonoBehaviour
         {
             lookDir = _dir;
             ani.SetFloat("X", lookDir.x);
+
+            if (lookDir.x < 0)
+                playerRenderer.transform.localScale = new Vector3(-1, 1, 1);
+            else
+                playerRenderer.transform.localScale = new Vector3(1, 1, 1);
+
             ani.SetFloat("Y", lookDir.y);
         }
         else
