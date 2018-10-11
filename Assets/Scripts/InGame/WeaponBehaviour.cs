@@ -5,13 +5,14 @@ using UnityEngine;
 public class WeaponBehaviour : MonoBehaviour
 {
     private PlayerBehaviour player;
-
+    [Header("무기 정보")]
     public Weapon weapon;
 
     public GameObject rendererObject;
     private SpriteRenderer spriteRenderer;
     private Animator ani;
 
+    [Header("속성 레벨")]
     // (min  = 0) ~ (max = 3)
     public int propLevel;
 
@@ -20,16 +21,25 @@ public class WeaponBehaviour : MonoBehaviour
     Quaternion rotQuaternion;
     Vector3 rotVector;
 
+    [Header("공격 애니메이션 정보")]
     public float attackAnimationCurrentTime = 0;
     public float[] attackAnimationTime;
 
+    [Header("콤보")]
     public int combo = 0;
     public int maxCombo = 2;
 
+    [Header("콤보 딜레이")]
     public float comboWaitTime = 0.5f;
     public float comboWaitCurrentTime;
 
-    public float power = 10f;
+    [Header("넉백 효과")]
+    public float knockBackPower = 10f;
+
+    [Header("카메라 쉐이크 효과")]
+    public float shakeAmount = 3;
+    public float shakeTime = 0.5f;
+    public float shakeLerp = 1f;
 
     public bool isAttack = false;
 
@@ -46,7 +56,7 @@ public class WeaponBehaviour : MonoBehaviour
         spriteRenderer = rendererObject.GetComponent<SpriteRenderer>();
         ani = rendererObject.GetComponent<Animator>();
     }
-        
+
     private void FixedUpdate()
     {
         Rotate();
@@ -73,7 +83,7 @@ public class WeaponBehaviour : MonoBehaviour
 
         ++combo;
 
-        if (combo == maxCombo +1)
+        if (combo == maxCombo + 1)
             combo = 1;
 
         weaponCollider.enabled = true;
@@ -83,7 +93,7 @@ public class WeaponBehaviour : MonoBehaviour
         player.SetDirection(rotVector.ConvertToRawVector3());
         player.UpdateState(PlayerState.Attack, true);
         player.GetAnimator().SetInteger("Combo", combo);
-        CameraController.instance.Shake(3, 0.3f, 1f);
+        CameraController.instance.Shake(shakeAmount, shakeTime, shakeLerp);
         if (attackWaitTimer != null)
         {
             StopCoroutine(attackWaitTimer);
@@ -139,7 +149,7 @@ public class WeaponBehaviour : MonoBehaviour
         {
             MonsterBehaviour monster = _monster.GetComponent<MonsterBehaviour>();
             monster.Damage(1);
-            monster.KnockBack(power, -player.GetDirectionToVector3(monster.transform.position));
+            monster.KnockBack(knockBackPower, -player.GetDirectionToVector3(monster.transform.position));
         }
     }
 

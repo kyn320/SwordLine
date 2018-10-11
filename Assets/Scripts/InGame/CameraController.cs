@@ -19,7 +19,7 @@ public class CameraController : MonoBehaviour
         shaker = GetComponentInChildren<CameraShake>();
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         if (target != null)
             transform.position = Vector3.Lerp(transform.position, target.position + margin, Time.deltaTime * lerpTime);

@@ -7,6 +7,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public PlayerState state;
 
+    private BoxCollider2D footCollider;
     private PlayerController controller;
     private Rigidbody2D ri;
     private Animator ani;
@@ -24,6 +25,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Awake()
     {
+        footCollider = GetComponent<BoxCollider2D>();
         controller = GetComponent<PlayerController>();
         ri = GetComponent<Rigidbody2D>();
         ani = playerRenderer.GetComponent<Animator>();
@@ -54,6 +56,7 @@ public class PlayerBehaviour : MonoBehaviour
             case PlayerState.Attack:
                 if (_isOn)
                 {
+                    ri.velocity = Vector2.zero;
                     state = PlayerState.Attack;
                 }
                 else
@@ -91,7 +94,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void SetDirection(Vector3 _dir)
     {
-        if (_dir != Vector3.zero)
+        if (_dir != Vector3.zero && state != PlayerState.Attack)
         {
             lookDir = _dir;
             ani.SetFloat("X", lookDir.x);
@@ -105,7 +108,9 @@ public class PlayerBehaviour : MonoBehaviour
         }
         else
         {
-            state = PlayerState.Idle;
+            if (state == PlayerState.Move)
+                state = PlayerState.Idle;
+
             ani.SetBool("Move", false);
         }
 
@@ -130,6 +135,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     IEnumerator EvasionEffect(float _time)
     {
+        footCollider.isTrigger = true;
         afterImageEffect.SetActive(true);
         ani.SetBool("Dash", true);
         float time = _time;
@@ -143,6 +149,7 @@ public class PlayerBehaviour : MonoBehaviour
 
         ri.velocity = Vector3.zero;
         yield return new WaitForSeconds(0.2f);
+        footCollider.isTrigger = false;
         controller.isInput = true;
         ani.SetBool("Dash", false);
         state = PlayerState.Idle;
@@ -151,6 +158,38 @@ public class PlayerBehaviour : MonoBehaviour
     }
     #endregion
 
+    #region 넉백 효과
+    public void KnockBack(float _power, Vector3 _dir)
+    {
+
+        if (knockBack != null)
+        {
+            StopCoroutine(knockBack);
+        }
+
+        knockBack = StartCoroutine(KnockBackEffect(_power, _dir));
+
+    }
+
+    Coroutine knockBack = null;
+
+    IEnumerator KnockBackEffect(float _power, Vector3 _dir)
+    {
+        ri.velocity = Vector2.zero;
+        ri.drag = _power * 0.7f;
+        ri.AddForce(_power * _dir, ForceMode2D.Impulse);
+
+        while (ri.velocity.sqrMagnitude > 0.1f)
+        {
+            yield return null;
+        }
+
+        ri.drag = 0f;
+        ri.velocity = Vector2.zero;
+        knockBack = null;
+
+    }
+    #endregion
 
     private void OnCollisionEnter2D(Collision2D _collision)
     {
@@ -167,6 +206,17 @@ public class PlayerBehaviour : MonoBehaviour
             controller.isInput = true;
             ani.SetBool("Dash", false);
             state = PlayerState.Idle;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D _collision)
+    {
+        if (state == PlayerState.Evasion && _collision.CompareTag("Fall"))
+        {
+            //TODO::낙사 액션 구현
+            print("Player is Falling.. Death");
+            state = PlayerState.Death;
+            ani.SetTrigger("Fall");
         }
     }
 
@@ -188,6 +238,7 @@ public enum PlayerState
 {
     Idle,
     Move,
+    KnockBack,
     Attack,
     Evasion,
     Death

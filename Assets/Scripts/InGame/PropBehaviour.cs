@@ -22,7 +22,7 @@ public class PropBehaviour : MonoBehaviour
 
     private void Start()
     {
-        ChangeProp(prop);
+        ChangeProp(PropDB.Instance.FindItem(PropType.OverDrive));
     }
 
     public void ChangeProp(Prop _prop)

@@ -11,8 +11,12 @@ public class SightChecker : MonoBehaviour
     public float sightRange = 1f;
     [Header("체크 할 레이어")]
     public LayerMask checkLayer;
+    [Header("시야 내 접근 이벤트")]
+    public UnityEvent sightEnter;
+    [Header("시야 밖 방출 이벤트")]
+    public UnityEvent sightExit;
 
-    public UnityAction<GameObject> sightEnterAction, sightExitAction;
+    public UnityAction<GameObject> sightEnterWithGameObject, sightExitWithGameObject;
 
     private void Awake()
     {
@@ -31,26 +35,36 @@ public class SightChecker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D _collision)
     {
-        if (_collision.gameObject.layer != checkLayer)
+        if ((1 << _collision.gameObject.layer) != checkLayer.value)
         {
             return;
         }
 
 
-        if (sightEnterAction != null)
-            sightEnterAction.Invoke(_collision.gameObject);
+        print("asd");
+
+        if (sightEnter != null)
+            sightEnter.Invoke();
+
+        if (sightEnterWithGameObject != null)
+            sightEnterWithGameObject.Invoke(_collision.gameObject);
 
     }
 
     private void OnTriggerExit2D(Collider2D _collision)
     {
-        if (_collision.gameObject.layer != checkLayer)
+        if ((1 << _collision.gameObject.layer) != checkLayer.value)
         {
             return;
         }
 
-        if (sightExitAction != null)
-            sightExitAction.Invoke(_collision.gameObject);
+        print("asd");
+
+        if (sightExit != null)
+            sightExit.Invoke();
+
+        if (sightExitWithGameObject != null)
+            sightExitWithGameObject.Invoke(_collision.gameObject);
 
     }
 

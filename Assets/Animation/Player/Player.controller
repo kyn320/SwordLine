@@ -364,7 +364,7 @@ BlendTree:
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: Blend
+    m_DirectBlendParameter: X
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 2fcf62bbce0028f4794d7e1985ffa8d5, type: 2}
@@ -380,7 +380,7 @@ BlendTree:
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: X
+    m_DirectBlendParameter: Y
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: faa42a49ce6678b4ebb87c7fcb706f58, type: 2}
@@ -388,14 +388,14 @@ BlendTree:
     m_Position: {x: 0, y: -1}
     m_TimeScale: 1
     m_CycleOffset: 0
-    m_DirectBlendParameter: X
+    m_DirectBlendParameter: Y
     m_Mirror: 0
   m_BlendParameter: X
   m_BlendParameterY: Y
   m_MinThreshold: 0
   m_MaxThreshold: 1
   m_UseAutomaticThresholds: 1
-  m_NormalizedBlendValues: 0
+  m_NormalizedBlendValues: 1
   m_BlendType: 1
 --- !u!206 &206958101252982442
 BlendTree:
@@ -846,7 +846,7 @@ AnimatorState:
   m_ObjectHideFlags: 3
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: NuckBack
+  m_Name: KnockBack
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1050,7 +1050,7 @@ AnimatorStateMachine:
   m_ChildStateMachines:
   - serializedVersion: 1
     m_StateMachine: {fileID: 1107221457815884764}
-    m_Position: {x: 180, y: 252, z: 0}
+    m_Position: {x: 168, y: 252, z: 0}
   m_AnyStateTransitions:
   - {fileID: 1101047074080138798}
   - {fileID: 1101192834625643524}

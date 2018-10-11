@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Diagnostics;
-namespace Astar2DPathFinding.Mika {
+namespace Astar2DPathFinding.Mika
+{
 
-    public class CountPath : MonoBehaviour, Pathfinding {
+    public class CountPath : MonoBehaviour, Pathfinding
+    {
         private Transform startPos;
         private Vector2 endPos;
         private Vector2[] pathArray;
@@ -17,6 +19,7 @@ namespace Astar2DPathFinding.Mika {
         public float moveSpeed;
 
         //Interval time between pathfinding
+        [Header("0으로 세팅 금지")]
         [SerializeField]
         private float intervalTime = 1.0f;
         [SerializeField]
@@ -24,12 +27,23 @@ namespace Astar2DPathFinding.Mika {
         [SerializeField]
         private bool showPathSmoothing;
 
-        public void FindPath(Transform _seeker, Vector2 _endPos) {
-            if (!readyToCountPath) {
+        public int GetPathLenght()
+        {
+            if (pathArray == null)
+                return -1;
+            else
+                return pathArray.Length;
+        }
+
+        public void FindPath(Transform _seeker, Vector2 _endPos)
+        {
+            if (!readyToCountPath)
+            {
                 return;
             }
 
-            else if (_seeker == null) {
+            else if (_seeker == null)
+            {
                 UnityEngine.Debug.LogError("Missing seeker!", this);
                 return;
             }
@@ -50,22 +64,27 @@ namespace Astar2DPathFinding.Mika {
             //    return;
             //}
 
-            if (_endPos != endPosition) {
+            if (_endPos != endPosition)
+            {
                 endPosition = _endPos;
                 ThreadController.SearchPathRequest(this, _seeker.position, endPosition);
 
             }
         }
         //This has not been tested
-        public void StopMovement() {
-            if (currentPath != null) {
+        public void StopMovement()
+        {
+            if (currentPath != null)
+            {
                 StopCoroutine(currentPath);
             }
 
         }
 
-        public void OnPathFound(Vector2[] newPath) {
-            if (currentPath != null) {
+        public void OnPathFound(Vector2[] newPath)
+        {
+            if (currentPath != null)
+            {
                 StopCoroutine(currentPath);
 
             }
@@ -75,12 +94,16 @@ namespace Astar2DPathFinding.Mika {
 
         }
 
-        public IEnumerator movepath(Vector2[] pathArray) {
-            if (pathArray == null) {
+        public IEnumerator movepath(Vector2[] pathArray)
+        {
+            if (pathArray == null)
+            {
                 yield break;
             }
-            for (int i = 0; i < pathArray.Length; i++) {
-                while ((Vector2)startPos.transform.position != pathArray[i]) {
+            for (int i = 0; i < pathArray.Length; i++)
+            {
+                while (((Vector2)startPos.transform.position - pathArray[i]).sqrMagnitude > 0.1f)
+                {
 
                     ////if (Physics2D.Linecast(startPos.transform.position, endPosition, Grid.instance.unwalkableMask) == false)
                     ////{
@@ -88,10 +111,13 @@ namespace Astar2DPathFinding.Mika {
                     ////    break;
                     ////}
 
-                    if (usePathSmooting && i < pathArray.Length - 1) {
+                    if (usePathSmooting && i < pathArray.Length - 1)
+                    {
                         bool cantSeeTarget = Physics2D.Linecast(startPos.transform.position, pathArray[i + 1], PathfindingGrid.Instance.unwalkableMask);
-                        if (cantSeeTarget == false) {
-                            if (showPathSmoothing) {
+                        if (cantSeeTarget == false)
+                        {
+                            if (showPathSmoothing)
+                            {
                                 UnityEngine.Debug.DrawLine(startPos.transform.position, pathArray[i + 1], Color.white, 10);
                             }
                             i++;
@@ -99,10 +125,13 @@ namespace Astar2DPathFinding.Mika {
 
                         }
                     }
-                    else {
+                    else
+                    {
                         bool cantSeeTarget = Physics2D.Linecast(startPos.transform.position, endPos, PathfindingGrid.Instance.unwalkableMask);
-                        if (cantSeeTarget == false) {
-                            if (showPathSmoothing) {
+                        if (cantSeeTarget == false)
+                        {
+                            if (showPathSmoothing)
+                            {
                                 UnityEngine.Debug.DrawLine(startPos.transform.position, endPos, Color.white, 10);
 
                             }
@@ -114,8 +143,8 @@ namespace Astar2DPathFinding.Mika {
                     Vector2 my_pos = transform.position;
                     target_pos.x = target_pos.x - my_pos.x;
                     target_pos.y = target_pos.y - my_pos.y;
-                    float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
-                    transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+                    //float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
+                    //transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
                     startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, pathArray[i], Time.deltaTime * moveSpeed);
                     //Vector2 direction = (pathArray[i] - startPos.transform.position).normalized * 100;
@@ -124,13 +153,14 @@ namespace Astar2DPathFinding.Mika {
                     yield return null;
                 }
             }
-            while (true) {
+            while (true)
+            {
                 Vector2 target_pos = endPos;
                 Vector2 my_pos = transform.position;
                 target_pos.x = target_pos.x - my_pos.x;
                 target_pos.y = target_pos.y - my_pos.y;
-                float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+                //float angle = Mathf.Atan2(target_pos.y, target_pos.x) * Mathf.Rad2Deg;
+                //transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
 
                 startPos.transform.position = Vector2.MoveTowards(startPos.transform.position, endPos, Time.deltaTime * moveSpeed);
                 //Vector2 direction = (endPosition - startPos.transform.position).normalized * 100; ;
@@ -139,18 +169,23 @@ namespace Astar2DPathFinding.Mika {
             }
         }
 
-        public IEnumerator PathCountDelay() {
+        public IEnumerator PathCountDelay()
+        {
             readyToCountPath = false;
-            float counter = Random.Range(intervalTime + 0.1f, intervalTime + 0.15f);
-            yield return new WaitForSeconds(counter);
+            if (intervalTime <= 0)
+                intervalTime = 0.1f;
+            yield return new WaitForSeconds(intervalTime);
             readyToCountPath = true;
 
         }
 
         //Draw path to gizmoz
-        public void OnDrawGizmos() {
-            if (pathArray != null) {
-                for (int i = 0; i < pathArray.Length - 1; i++) {
+        public void OnDrawGizmos()
+        {
+            if (pathArray != null)
+            {
+                for (int i = 0; i < pathArray.Length - 1; i++)
+                {
                     Gizmos.color = Color.black;
                     Gizmos.DrawCube(pathArray[i], Vector2.one);
                     Gizmos.DrawLine(pathArray[i], pathArray[i + 1]);
