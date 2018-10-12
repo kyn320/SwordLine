@@ -15,13 +15,10 @@ namespace Astar2DPathFinding.Mika
         private Vector2 endPosition;
         private bool readyToCountPath = true;
 
-
+        [HideInInspector]
         public float moveSpeed;
 
         //Interval time between pathfinding
-        [Header("0으로 세팅 금지")]
-        [SerializeField]
-        private float intervalTime = 1.0f;
         [SerializeField]
         private bool usePathSmooting;
         [SerializeField]
@@ -71,6 +68,17 @@ namespace Astar2DPathFinding.Mika
 
             }
         }
+
+        public void RestartMovement()
+        {
+            if (currentPath != null)
+            {
+                StopCoroutine(currentPath);
+            }
+            currentPath = movepath(pathArray);
+            StartCoroutine(currentPath);
+        }
+
         //This has not been tested
         public void StopMovement()
         {
@@ -167,16 +175,6 @@ namespace Astar2DPathFinding.Mika
                 //startPos.GetComponent<Rigidbody2D>().velocity = direction * Time.deltaTime * movespeed;
                 yield return null;
             }
-        }
-
-        public IEnumerator PathCountDelay()
-        {
-            readyToCountPath = false;
-            if (intervalTime <= 0)
-                intervalTime = 0.1f;
-            yield return new WaitForSeconds(intervalTime);
-            readyToCountPath = true;
-
         }
 
         //Draw path to gizmoz

@@ -40,9 +40,6 @@ public class SightChecker : MonoBehaviour
             return;
         }
 
-
-        print("asd");
-
         if (sightEnter != null)
             sightEnter.Invoke();
 
@@ -57,8 +54,6 @@ public class SightChecker : MonoBehaviour
         {
             return;
         }
-
-        print("asd");
 
         if (sightExit != null)
             sightExit.Invoke();

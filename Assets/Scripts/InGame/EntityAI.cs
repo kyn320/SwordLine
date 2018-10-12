@@ -7,6 +7,10 @@ public class EntityAI : MonoBehaviour
 {
     [Header("시야 인식 범위")]
     public float sightRange = 1f;
+    [Header("타겟")]
+    public Transform target;
+    [Header("타겟 위치 갱신 시간")]
+    public float intervalTime = 0.4f;
 
     protected CountPath countPath;
     protected SightChecker sightChecker;
@@ -21,14 +25,20 @@ public class EntityAI : MonoBehaviour
         sightChecker.SetSight(sightRange);
     }
 
-
-
-    protected virtual void Update()
+    public void SetMoveSpeed(float _moveSpeed)
     {
+        countPath.moveSpeed = _moveSpeed;
+    }
+
+    public virtual void StartMovement() {
 
     }
 
-   
+    public virtual void StopMovement()
+    {
+        countPath.StopMovement();
+    }
+
 
 }
 

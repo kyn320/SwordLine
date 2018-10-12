@@ -6,24 +6,37 @@ public class MonsterBehaviour : MonoBehaviour
 {
 
     public int hp;
+    public int maxHP;
+
     public MonsterState state;
 
     public float moveSpeed = 1f;
 
     public bool isSuperPower = false;
 
+
+    public GameObject monsterRenderer;
+    private SpriteRenderer spriteRenderer;
+
+    private Animator ani;
     private MonsterAI ai;
     private Rigidbody2D ri;
+
+    public string damageTextPrefab;
+    private string damageEffect;
 
     private void Awake()
     {
         ri = GetComponent<Rigidbody2D>();
         ai = GetComponent<MonsterAI>();
+        ani = monsterRenderer.GetComponent<Animator>();
+        spriteRenderer = monsterRenderer.GetComponent<SpriteRenderer>();
     }
 
     private void Start()
     {
         ai.SetMoveSpeed(moveSpeed);
+        hp = maxHP;
     }
 
     public void UpdateState(MonsterState _state, bool _isOn = true)
@@ -36,8 +49,9 @@ public class MonsterBehaviour : MonoBehaviour
                 break;
             case MonsterState.Trace:
                 state = MonsterState.Trace;
+                ri.velocity = Vector2.zero;
+                ai.StartMovement();
                 //TODO :: LED 빨간색으로 변경
-
                 break;
             case MonsterState.Attack:
                 if (_isOn)
@@ -45,11 +59,15 @@ public class MonsterBehaviour : MonoBehaviour
                     ri.velocity = Vector2.zero;
                     ai.StopMovement();
                     state = MonsterState.Attack;
+                    //TODO :: 공격 구현
                 }
                 else
                 {
                     state = MonsterState.Idle;
                 }
+                break;
+            case MonsterState.Damage:
+                state = MonsterState.Damage;
                 break;
             case MonsterState.Hacking:
                 state = MonsterState.Hacking;
@@ -62,21 +80,26 @@ public class MonsterBehaviour : MonoBehaviour
                 break;
             case MonsterState.Reset:
                 state = MonsterState.Reset;
-                //TODO ::  체력을 100% 회복
+                //TODO ::  ??
                 break;
             case MonsterState.End:
                 state = MonsterState.End;
-                //TODO :: 왜 필요한건지 아직 모르겠음..?
+                isSuperPower = false;
+                ai.SetMoveSpeed(moveSpeed);
+                UpdateState(MonsterState.Idle);
                 break;
             case MonsterState.Return:
                 state = MonsterState.Return;
                 //TODO :: 최초 스폰 장소로 귀환
                 //TODO :: 도착 할때까지 무적 상태, 이동속도 2배
+                hp = maxHP;
                 isSuperPower = true;
                 ai.SetMoveSpeed(moveSpeed * 2f);
                 break;
             case MonsterState.Death:
                 state = MonsterState.Death;
+                ai.StopMovement();
+                Death();
                 //TODO :: 사망 애니메이션 출력
                 //TODO :: 3초 동안 불투명도 (Alpha) n 만큼 값 하락
                 //TODO :: 불투명도가 0이 되면 삭제
@@ -84,6 +107,13 @@ public class MonsterBehaviour : MonoBehaviour
         }
 
     }
+
+    #region 공격
+    public void Attack()
+    {
+        //TODO ::  공격 구현
+    }
+    #endregion
 
     #region HP 제어
     public void Heal(int _value)
@@ -96,19 +126,33 @@ public class MonsterBehaviour : MonoBehaviour
         if (isSuperPower)
             return;
 
+        UpdateState(MonsterState.Damage);
+
         hp -= _value;
 
+        GameObject g = ObjectPoolManager.Instance.Get(damageTextPrefab);
+        g.transform.position = transform.position;
+        g.GetComponent<UIDamageText>().SetText(_value.ToString());
+
+        g = ObjectPoolManager.Instance.Get(damageEffect);
+        g.transform.position = transform.position;
+
+
         if (hp < 1)
-            Death();
+            UpdateState(MonsterState.Death);
     }
 
     public void Death()
     {
-        state = MonsterState.Death;
         //TODO :: 사망 판정 구현
-
+        StartCoroutine(DeathEffect(3f));
     }
     #endregion
+
+    public void SetDamageEffect(string _damageEffect)
+    {
+        damageEffect = _damageEffect;
+    }
 
     #region 넉백효과
     public void KnockBack(float _power, Vector3 _dir)
@@ -127,8 +171,11 @@ public class MonsterBehaviour : MonoBehaviour
 
     IEnumerator KnockBackEffect(float _power, Vector3 _dir)
     {
+        ri.constraints = RigidbodyConstraints2D.FreezeRotation;
+        ai.StopMovement();
+
         ri.velocity = Vector2.zero;
-        ri.drag = _power * 0.7f;
+        ri.drag = _power * 0.8f;
         ri.AddForce(_power * _dir, ForceMode2D.Impulse);
 
         while (ri.velocity.sqrMagnitude > 0.1f)
@@ -139,10 +186,30 @@ public class MonsterBehaviour : MonoBehaviour
         ri.drag = 0f;
         ri.velocity = Vector2.zero;
         knockBack = null;
+        ri.constraints = RigidbodyConstraints2D.FreezeAll;
 
+        if (state == MonsterState.Damage)
+        {
+            UpdateState(MonsterState.Trace);
+            ai.RestartMovement();
+        }
     }
 
     #endregion
+
+    IEnumerator DeathEffect(float _time)
+    {
+        float time = _time;
+        Color color = spriteRenderer.color;
+
+        while (time > 0)
+        {
+            color.a -= (1 / _time);
+            time -= Time.deltaTime;
+            spriteRenderer.color = color;
+            yield return null;
+        }
+    }
 }
 
 public enum MonsterState
@@ -159,6 +226,10 @@ public enum MonsterState
     /// 공격 범위에 들어와 공격하는 상태
     /// </summary>
     Attack,
+    /// <summary>
+    /// 공격 받는 상태
+    /// </summary>
+    Damage,
     /// <summary>
     /// 해킹 당한 상태
     /// </summary>

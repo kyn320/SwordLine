@@ -23,12 +23,24 @@ public class PlayerBehaviour : MonoBehaviour
     public GameObject playerRenderer;
     public GameObject afterImageEffect;
 
+    public string footStepDustEffectPrefab;
+    public float stepDistance;
+    public float footYOffeset;
+    private Vector3 oldPosition;
+
+    public float evasionDistance = 3f;
+
     private void Awake()
     {
         footCollider = GetComponent<BoxCollider2D>();
         controller = GetComponent<PlayerController>();
         ri = GetComponent<Rigidbody2D>();
         ani = playerRenderer.GetComponent<Animator>();
+    }
+
+    private void Start()
+    {
+        StartCoroutine(DustEffect());
     }
 
     private void FixedUpdate()
@@ -47,6 +59,19 @@ public class PlayerBehaviour : MonoBehaviour
         state = PlayerState.Move;
         ani.SetBool("Move", true);
         ri.velocity = dir * moveSpeed;
+    }
+
+    IEnumerator DustEffect()
+    {
+        while (true)
+        {
+            if ((oldPosition - transform.position).sqrMagnitude >= stepDistance)
+            {
+                GameObject g = ObjectPoolManager.Instance.Get(footStepDustEffectPrefab);
+                oldPosition = g.transform.position = transform.position + Vector3.up * footYOffeset;
+            }
+            yield return null;
+        }
     }
 
     public void UpdateState(PlayerState _state, bool _isOn = true)
@@ -119,6 +144,32 @@ public class PlayerBehaviour : MonoBehaviour
     }
 
     #region 회피 효과
+
+    public int CheckEvasion()
+    {
+        Debug.DrawRay(transform.position + lookDir * evasionDistance, Vector3.forward, Color.red, 1f);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position + lookDir * evasionDistance, Vector3.forward, 3f);
+        if (hit.collider != null)
+        {
+            if (hit.collider.gameObject.CompareTag("Wall"))
+            {
+                print("Wall Evasion");
+                return 1;
+            }
+            else if (hit.collider.gameObject.CompareTag("Fall"))
+            {
+                print("Fall evaion");
+                return 2;
+            }
+            else
+            {
+                print("ground evasion");
+                return 0;
+            }
+        }
+        return 0;
+    }
+
     public void Evasion(float _time)
     {
         state = PlayerState.Evasion;
@@ -135,13 +186,22 @@ public class PlayerBehaviour : MonoBehaviour
 
     IEnumerator EvasionEffect(float _time)
     {
-        footCollider.isTrigger = true;
         afterImageEffect.SetActive(true);
         ani.SetBool("Dash", true);
         float time = _time;
 
         while (time >= 0 && state == PlayerState.Evasion)
         {
+
+            int evasionChecker = CheckEvasion();
+
+            if (evasionChecker == 2)
+            {
+                footCollider.isTrigger = true;
+            }
+            else
+                footCollider.isTrigger = false;
+
             ri.velocity = lookDir * moveSpeed * 2f;
             time -= Time.deltaTime;
             yield return null;
@@ -149,7 +209,6 @@ public class PlayerBehaviour : MonoBehaviour
 
         ri.velocity = Vector3.zero;
         yield return new WaitForSeconds(0.2f);
-        footCollider.isTrigger = false;
         controller.isInput = true;
         ani.SetBool("Dash", false);
         state = PlayerState.Idle;
@@ -206,7 +265,10 @@ public class PlayerBehaviour : MonoBehaviour
             controller.isInput = true;
             ani.SetBool("Dash", false);
             state = PlayerState.Idle;
+
+            return;
         }
+
     }
 
     private void OnTriggerEnter2D(Collider2D _collision)
@@ -217,7 +279,10 @@ public class PlayerBehaviour : MonoBehaviour
             print("Player is Falling.. Death");
             state = PlayerState.Death;
             ani.SetTrigger("Fall");
+
+            return;
         }
+
     }
 
 

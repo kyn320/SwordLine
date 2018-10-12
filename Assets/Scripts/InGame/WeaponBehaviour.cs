@@ -16,8 +16,6 @@ public class WeaponBehaviour : MonoBehaviour
     // (min  = 0) ~ (max = 3)
     public int propLevel;
 
-    private Collider2D weaponCollider;
-
     Quaternion rotQuaternion;
     Vector3 rotVector;
 
@@ -40,6 +38,8 @@ public class WeaponBehaviour : MonoBehaviour
     public float shakeAmount = 3;
     public float shakeTime = 0.5f;
     public float shakeLerp = 1f;
+    
+    private string damageEffect;
 
     public bool isAttack = false;
 
@@ -52,9 +52,9 @@ public class WeaponBehaviour : MonoBehaviour
         }
 
         player = transform.root.GetComponent<PlayerBehaviour>();
-        weaponCollider = rendererObject.GetComponent<Collider2D>();
         spriteRenderer = rendererObject.GetComponent<SpriteRenderer>();
         ani = rendererObject.GetComponent<Animator>();
+        damageEffect = "Effect_Hit_" + transform.root.GetComponent<PropBehaviour>().prop.type.ToString();
     }
 
     private void FixedUpdate()
@@ -85,15 +85,17 @@ public class WeaponBehaviour : MonoBehaviour
 
         if (combo == maxCombo + 1)
             combo = 1;
-
-        weaponCollider.enabled = true;
+        
         ani.SetInteger("Combo", combo);
         attackAnimationCurrentTime = attackAnimationTime[combo - 1];
         ani.SetTrigger("Attack");
         player.SetDirection(rotVector.ConvertToRawVector3());
         player.UpdateState(PlayerState.Attack, true);
         player.GetAnimator().SetInteger("Combo", combo);
+
+        //TODO :: 카메라 컨트롤러 의존성 분리
         CameraController.instance.Shake(shakeAmount, shakeTime, shakeLerp);
+
         if (attackWaitTimer != null)
         {
             StopCoroutine(attackWaitTimer);
@@ -120,7 +122,6 @@ public class WeaponBehaviour : MonoBehaviour
         player.UpdateState(PlayerState.Attack, false);
         player.GetAnimator().SetInteger("Combo", 0);
         attackAnimationCurrentTime = 0f;
-        weaponCollider.enabled = false;
         isAttack = false;
 
     }
@@ -148,8 +149,9 @@ public class WeaponBehaviour : MonoBehaviour
         if (_monster.CompareTag("Monster"))
         {
             MonsterBehaviour monster = _monster.GetComponent<MonsterBehaviour>();
-            monster.Damage(1);
+            monster.SetDamageEffect(damageEffect);
             monster.KnockBack(knockBackPower, -player.GetDirectionToVector3(monster.transform.position));
+            monster.Damage(1);
         }
     }
 
