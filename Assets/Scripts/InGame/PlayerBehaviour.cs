@@ -24,11 +24,14 @@ public class PlayerBehaviour : MonoBehaviour
     public GameObject afterImageEffect;
 
     public string footStepDustEffectPrefab;
+
+    public Transform footTransform;
     public float stepDistance;
-    public float footYOffeset;
+
+
     private Vector3 oldPosition;
 
-    public float evasionDistance = 3f;
+    private float evasionDistance = 1f;
 
     private void Awake()
     {
@@ -68,7 +71,7 @@ public class PlayerBehaviour : MonoBehaviour
             if ((oldPosition - transform.position).sqrMagnitude >= stepDistance)
             {
                 GameObject g = ObjectPoolManager.Instance.Get(footStepDustEffectPrefab);
-                oldPosition = g.transform.position = transform.position + Vector3.up * footYOffeset;
+                oldPosition = g.transform.position = footTransform.position;
             }
             yield return null;
         }
@@ -145,12 +148,13 @@ public class PlayerBehaviour : MonoBehaviour
 
     #region 회피 효과
 
-    public int CheckEvasion()
+    public int CheckEvasion(float _evasionDistance)
     {
-        Debug.DrawRay(transform.position + lookDir * evasionDistance, Vector3.forward, Color.red, 1f);
-        RaycastHit2D hit = Physics2D.Raycast(transform.position + lookDir * evasionDistance, Vector3.forward, 3f);
+        //Debug.DrawRay(footTransform.position + lookDir * _evasionDistance, Vector3.forward, Color.red, 1f);
+        RaycastHit2D hit = Physics2D.Raycast(footTransform.position + lookDir * _evasionDistance, Vector3.forward, 3f, LayerMask.GetMask("UnWalkable"));
         if (hit.collider != null)
         {
+            print(hit.collider.gameObject.tag);
             if (hit.collider.gameObject.CompareTag("Wall"))
             {
                 print("Wall Evasion");
@@ -189,11 +193,11 @@ public class PlayerBehaviour : MonoBehaviour
         afterImageEffect.SetActive(true);
         ani.SetBool("Dash", true);
         float time = _time;
-
+        int evasionChecker = -1;
         while (time >= 0 && state == PlayerState.Evasion)
         {
 
-            int evasionChecker = CheckEvasion();
+            evasionChecker = CheckEvasion(evasionDistance);
 
             if (evasionChecker == 2)
             {
@@ -208,6 +212,14 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
         ri.velocity = Vector3.zero;
+
+        print("evasion end");
+
+        if (CheckEvasion(0) == 2)
+        {
+            Fall();
+        }
+
         yield return new WaitForSeconds(0.2f);
         controller.isInput = true;
         ani.SetBool("Dash", false);
@@ -250,6 +262,14 @@ public class PlayerBehaviour : MonoBehaviour
     }
     #endregion
 
+    private void Fall()
+    {
+        print("Player is Falling.. Death");
+        ri.velocity = Vector3.zero;
+        state = PlayerState.Death;
+        ani.SetTrigger("Fall");
+    }
+
     private void OnCollisionEnter2D(Collision2D _collision)
     {
         if (state == PlayerState.Evasion)
@@ -262,6 +282,12 @@ public class PlayerBehaviour : MonoBehaviour
 
             afterImageEffect.SetActive(false);
             ri.velocity = Vector3.zero;
+            if (CheckEvasion(0) == 2)
+            {
+                print("collisoin");
+                Fall();
+                return;
+            }
             controller.isInput = true;
             ani.SetBool("Dash", false);
             state = PlayerState.Idle;
@@ -276,14 +302,15 @@ public class PlayerBehaviour : MonoBehaviour
         if (state == PlayerState.Evasion && _collision.CompareTag("Fall"))
         {
             //TODO::낙사 액션 구현
-            print("Player is Falling.. Death");
-            state = PlayerState.Death;
-            ani.SetTrigger("Fall");
-
+            print("trigger");
+            Fall();
             return;
         }
 
     }
+
+
+
 
 
     public Vector3 GetDirectionToVector3(Vector3 _pos)
