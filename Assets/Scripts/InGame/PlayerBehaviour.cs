@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-
     public PlayerState state;
 
     private BoxCollider2D footCollider;
     private PlayerController controller;
     private Rigidbody2D ri;
     private Animator ani;
+    private SightChecker sightChecker;
+
+    [HideInInspector]
+    public PropBehaviour prop;
 
     public int hp;
     public float attackDamage;
@@ -33,12 +36,17 @@ public class PlayerBehaviour : MonoBehaviour
 
     private float evasionDistance = 1f;
 
+    public string damageTextPrefab;
+    public string damageEffect;
+
     private void Awake()
     {
         footCollider = GetComponent<BoxCollider2D>();
         controller = GetComponent<PlayerController>();
         ri = GetComponent<Rigidbody2D>();
+        sightChecker = GetComponentInChildren<SightChecker>();
         ani = playerRenderer.GetComponent<Animator>();
+        prop = GetComponent<PropBehaviour>();
     }
 
     private void Start()
@@ -81,6 +89,10 @@ public class PlayerBehaviour : MonoBehaviour
     {
         switch (_state)
         {
+            case PlayerState.Interactive:
+                state = PlayerState.Interactive;
+                break;
+
             case PlayerState.Attack:
                 if (_isOn)
                 {
@@ -106,7 +118,16 @@ public class PlayerBehaviour : MonoBehaviour
     public void Damage(int _value)
     {
         hp -= _value;
+
         ani.SetTrigger("NuckBack");
+
+        GameObject g = ObjectPoolManager.Instance.Get(damageTextPrefab);
+        g.transform.position = transform.position;
+        g.GetComponent<UIDamageText>().SetText(_value.ToString(), Color.red);
+
+        g = ObjectPoolManager.Instance.Get(damageEffect);
+        g.transform.position = transform.position;
+
         if (hp < 1)
             Death();
     }
@@ -115,8 +136,10 @@ public class PlayerBehaviour : MonoBehaviour
     {
         state = PlayerState.Death;
         ani.SetTrigger("Death");
-        //TODO :: 사망 판정 구현
-
+        //최근 세이브 포인트로 이동
+        transform.position = SavePointManager.Instance.GetSavePoint().transform.position;
+        Heal(10);
+        
     }
     #endregion
 
@@ -309,10 +332,6 @@ public class PlayerBehaviour : MonoBehaviour
 
     }
 
-
-
-
-
     public Vector3 GetDirectionToVector3(Vector3 _pos)
     {
         return (transform.position - _pos).normalized;
@@ -321,6 +340,11 @@ public class PlayerBehaviour : MonoBehaviour
     public Animator GetAnimator()
     {
         return ani;
+    }
+
+    public SightChecker GetSightChecker()
+    {
+        return sightChecker;
     }
 
 }
@@ -333,5 +357,6 @@ public enum PlayerState
     KnockBack,
     Attack,
     Evasion,
+    Interactive,
     Death
 }

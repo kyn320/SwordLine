@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class WeaponBehaviour : MonoBehaviour
 {
@@ -12,9 +13,9 @@ public class WeaponBehaviour : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Animator ani;
 
-    [Header("속성 레벨")]
-    // (min  = 0) ~ (max = 3)
+    [Header("속성 레벨 (min  = 0) ~ (max = 3)")]
     public int propLevel;
+    public PropAttack propAttack;
 
     Quaternion rotQuaternion;
     Vector3 rotVector;
@@ -38,10 +39,12 @@ public class WeaponBehaviour : MonoBehaviour
     public float shakeAmount = 3;
     public float shakeTime = 0.5f;
     public float shakeLerp = 1f;
-    
+
     private string damageEffect;
 
     public bool isAttack = false;
+
+    private UnityAction<float> damageOperator;
 
     private void Awake()
     {
@@ -54,7 +57,11 @@ public class WeaponBehaviour : MonoBehaviour
         player = transform.root.GetComponent<PlayerBehaviour>();
         spriteRenderer = rendererObject.GetComponent<SpriteRenderer>();
         ani = rendererObject.GetComponent<Animator>();
-        damageEffect = "Effect_Hit_" + transform.root.GetComponent<PropBehaviour>().prop.type.ToString();
+    }
+
+    private void Start()
+    {
+        SetProp();
     }
 
     private void FixedUpdate()
@@ -85,7 +92,7 @@ public class WeaponBehaviour : MonoBehaviour
 
         if (combo == maxCombo + 1)
             combo = 1;
-        
+
         ani.SetInteger("Combo", combo);
         attackAnimationCurrentTime = attackAnimationTime[combo - 1];
         ani.SetTrigger("Attack");
@@ -143,18 +150,63 @@ public class WeaponBehaviour : MonoBehaviour
 
     }
 
-
-    public void Damage(GameObject _monster)
+    public void SetProp()
     {
-        if (_monster.CompareTag("Monster"))
+        PropType type = player.prop.prop.type;
+
+        switch (type)
         {
-            MonsterBehaviour monster = _monster.GetComponent<MonsterBehaviour>();
-            monster.SetDamageEffect(damageEffect);
-            monster.KnockBack(knockBackPower, -player.GetDirectionToVector3(monster.transform.position));
-            monster.Damage(1);
+            case PropType.OverDrive:
+                propAttack = gameObject.AddComponent<PropOverDrive>();
+                propAttack.prop = player.prop.prop;
+                break;
+            case PropType.Hacking:
+                propAttack = gameObject.AddComponent<PropHacking>();
+                propAttack.prop = player.prop.prop;
+                break;
+            case PropType.Hologram:
+                propAttack = gameObject.AddComponent<PropHologram>();
+                break;
+            default:
+                Debug.LogError("WeaponBehaviour :: 존재하지 않는 속성 타입입니다. 무기 정보를 확인해 주세요.");
+                return;
         }
+
+        propAttack.prop = player.prop.prop;
+
     }
 
 
+    public void Damage(GameObject _monsterObject)
+    {
+        if (_monsterObject.CompareTag("Monster"))
+        {
+            MonsterBehaviour monster = _monsterObject.GetComponent<MonsterBehaviour>();
+            monster.KnockBack(knockBackPower, -player.GetDirectionToVector3(monster.transform.position));
+            if (propAttack != null)
+            {
+                propAttack.Attack(monster);
+            }
+            monster.Damage(OperateDamage());
+        }
+    }
+
+    public int OperateDamage()
+    {
+        float totalDamage = 0;
+
+        //TODO ::  속성을 제외한 모든 공격력 연산을 구현
+
+        //무기 고유 공격력 대입
+        totalDamage = weapon.damage;
+
+        //속성 특성에 따른 공격력 연산
+        if (propAttack != null)
+        {
+            totalDamage = propAttack.OperateDamage(totalDamage);
+        }
+
+        return (int)totalDamage;
+    }
 
 }

@@ -12,4 +12,10 @@ public class UIDamageText : MonoBehaviour
         damageText.text = _text;
     }
 
+    public void SetText(string _text, Color _color)
+    {
+        damageText.text = _text;
+        damageText.color = _color;
+    }
+
 }

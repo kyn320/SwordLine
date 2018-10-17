@@ -56,7 +56,7 @@ public class MonsterAI : EntityAI
     {
         while (target != null)
         {
-            if (monster.state == MonsterState.Damage || monster.state == MonsterState.Death)
+            if (monster.state == MonsterState.Damage || monster.state == MonsterState.Hacking || monster.state == MonsterState.Death)
             {
                 break;
             }

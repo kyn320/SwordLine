@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SavePoint : MonoBehaviour {
+public class SavePoint : MonoBehaviour
+{
+    public static SavePointManager savePointManager;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
+    public int pointID;
+    public string pointName;
+
+    
 }

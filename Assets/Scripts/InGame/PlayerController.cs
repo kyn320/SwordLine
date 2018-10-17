@@ -37,9 +37,11 @@ public class PlayerController : MonoBehaviour
         //상호작용 처리
         if (isInteracted && Input.GetKeyDown(KeyCode.E))
         {
-            isInput = false;
-            //TODO :: 상호작용 구현
-
+            //isInput = false;
+            ////TODO :: 상호작용 구현
+            //isInteracted = false;
+            //player.UpdateState(PlayerState.Interactive);
+            player.GetSightChecker().recentSightInGameObject.GetComponent<InteractiveObject>().Interactive();
         }
 
         //무기체인지 처리
@@ -61,11 +63,13 @@ public class PlayerController : MonoBehaviour
             player.Evasion(evasionTime);
 
         }
-     
-
     }
 
+    public void OnInteractive(bool _isInteractive)
+    {
+        isInteracted = _isInteractive;
 
+    }
 
 
 }

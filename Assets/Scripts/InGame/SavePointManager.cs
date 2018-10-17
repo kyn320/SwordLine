@@ -2,15 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SavePointManager : MonoBehaviour {
+public class SavePointManager : Singleton<SavePointManager>
+{
+    public SavePoint currentSavePoint;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public List<SavePoint> savePointList;
+
+    public override void Awake()
+    {
+        base.Awake();
+        SavePoint.savePointManager = this;
+    }
+
+    public SavePoint FindSavePointToID(int _id)
+    {
+        return savePointList.Find(item => item.pointID == _id);
+    }
+
+    public void SetSavePoint(SavePoint _savePoint)
+    {
+        currentSavePoint = _savePoint;
+    }
+
+    public SavePoint GetSavePoint()
+    {
+        return currentSavePoint;
+    }
+        
 }

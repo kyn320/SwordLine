@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MonsterBehaviour : MonoBehaviour
 {
-
     public int hp;
     public int maxHP;
 
@@ -13,7 +12,6 @@ public class MonsterBehaviour : MonoBehaviour
     public float moveSpeed = 1f;
 
     public bool isSuperPower = false;
-
 
     public GameObject monsterRenderer;
     private SpriteRenderer spriteRenderer;
@@ -73,7 +71,6 @@ public class MonsterBehaviour : MonoBehaviour
                 state = MonsterState.Hacking;
                 //TODO :: 스턴 구현
                 ai.StopMovement();
-
                 //TODO :: 스킬 사용 불가능
                 //TODO :: LED 보라색으로 변경
                 //TODO :: 해킹 이펙트 출력
@@ -132,10 +129,7 @@ public class MonsterBehaviour : MonoBehaviour
 
         GameObject g = ObjectPoolManager.Instance.Get(damageTextPrefab);
         g.transform.position = transform.position;
-        g.GetComponent<UIDamageText>().SetText(_value.ToString());
-
-        g = ObjectPoolManager.Instance.Get(damageEffect);
-        g.transform.position = transform.position;
+        g.GetComponent<UIDamageText>().SetText(_value.ToString(), Color.white);
 
 
         if (hp < 1)
@@ -148,11 +142,6 @@ public class MonsterBehaviour : MonoBehaviour
         StartCoroutine(DeathEffect(3f));
     }
     #endregion
-
-    public void SetDamageEffect(string _damageEffect)
-    {
-        damageEffect = _damageEffect;
-    }
 
     #region 넉백효과
     public void KnockBack(float _power, Vector3 _dir)
@@ -193,6 +182,32 @@ public class MonsterBehaviour : MonoBehaviour
             UpdateState(MonsterState.Trace);
             ai.RestartMovement();
         }
+    }
+
+    #endregion
+
+    #region 해킹효과
+
+    public void Hacking(float _hackingTime)
+    {
+
+    }
+
+    Coroutine hacking = null;
+
+    IEnumerator HackingEffect(float _hackingTime)
+    {
+        float hackingTime = _hackingTime;
+
+        while (hackingTime > 0)
+        {
+            //
+            hackingTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        //TODO ::  일반 상태로 전환 
+
     }
 
     #endregion
