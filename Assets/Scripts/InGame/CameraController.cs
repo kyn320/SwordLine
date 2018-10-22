@@ -6,10 +6,13 @@ public class CameraController : MonoBehaviour
 {
     public static CameraController instance;
 
+    [Header("카메라 타겟 대상")]
     public Transform target;
 
+    [Header("위치 조정")]
     public Vector3 margin;
-    public float lerpTime = 10f;
+    [Header("이동 러프 속도")]
+    public float lerpSpeed = 10f;
 
     private CameraShake shaker;
 
@@ -22,7 +25,7 @@ public class CameraController : MonoBehaviour
     private void FixedUpdate()
     {
         if (target != null)
-            transform.position = Vector3.Lerp(transform.position, target.position + margin, Time.deltaTime * lerpTime);
+            transform.position = Vector3.Lerp(transform.position, target.position + margin, Time.deltaTime * lerpSpeed);
 
     }
 

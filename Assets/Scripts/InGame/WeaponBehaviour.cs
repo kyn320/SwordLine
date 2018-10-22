@@ -8,6 +8,7 @@ public class WeaponBehaviour : MonoBehaviour
     private PlayerBehaviour player;
     [Header("무기 정보")]
     public Weapon weapon;
+    private AttackCollider attackCollider;
 
     public GameObject rendererObject;
     private SpriteRenderer spriteRenderer;
@@ -57,11 +58,13 @@ public class WeaponBehaviour : MonoBehaviour
         player = transform.root.GetComponent<PlayerBehaviour>();
         spriteRenderer = rendererObject.GetComponent<SpriteRenderer>();
         ani = rendererObject.GetComponent<Animator>();
+        attackCollider = GetComponentInChildren<AttackCollider>();
     }
 
     private void Start()
     {
         SetProp();
+        attackCollider.damageAction += Damage;
     }
 
     private void FixedUpdate()
@@ -86,7 +89,7 @@ public class WeaponBehaviour : MonoBehaviour
         if (attackAnimationCurrentTime > 0)
             return;
 
-        isAttack = true;
+        attackCollider.SetAttack(true);
 
         ++combo;
 
@@ -129,7 +132,7 @@ public class WeaponBehaviour : MonoBehaviour
         player.UpdateState(PlayerState.Attack, false);
         player.GetAnimator().SetInteger("Combo", 0);
         attackAnimationCurrentTime = 0f;
-        isAttack = false;
+        attackCollider.SetAttack(false);
 
     }
 
@@ -152,17 +155,15 @@ public class WeaponBehaviour : MonoBehaviour
 
     public void SetProp()
     {
-        PropType type = player.prop.prop.type;
+        PropType type = player.propBehaviour.prop.type;
 
         switch (type)
         {
             case PropType.OverDrive:
                 propAttack = gameObject.AddComponent<PropOverDrive>();
-                propAttack.prop = player.prop.prop;
                 break;
             case PropType.Hacking:
                 propAttack = gameObject.AddComponent<PropHacking>();
-                propAttack.prop = player.prop.prop;
                 break;
             case PropType.Hologram:
                 propAttack = gameObject.AddComponent<PropHologram>();
@@ -172,7 +173,7 @@ public class WeaponBehaviour : MonoBehaviour
                 return;
         }
 
-        propAttack.prop = player.prop.prop;
+        propAttack.prop = player.propBehaviour.prop;
 
     }
 
@@ -183,11 +184,11 @@ public class WeaponBehaviour : MonoBehaviour
         {
             MonsterBehaviour monster = _monsterObject.GetComponent<MonsterBehaviour>();
             monster.KnockBack(knockBackPower, -player.GetDirectionToVector3(monster.transform.position));
+            monster.Damage(OperateDamage());
             if (propAttack != null)
             {
                 propAttack.Attack(monster);
             }
-            monster.Damage(OperateDamage());
         }
     }
 

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
+    [Header("플레이어 상태")]
     public PlayerState state;
 
     private BoxCollider2D footCollider;
@@ -13,22 +14,35 @@ public class PlayerBehaviour : MonoBehaviour
     private SightChecker sightChecker;
 
     [HideInInspector]
-    public PropBehaviour prop;
+    public PropBehaviour propBehaviour;
 
+    [Header("현재 체력")]
     public int hp;
-    public float attackDamage;
-    public float attackSpeed;
+    [Header("최대 체력")]
+    public int maxHp;
+
+    [Header("현재 스테미너")]
+    public int sp;
+    [Header("최대 스테미너")]
+    public int maxSp;
+
+    [Header("이동 속도")]
     public float moveSpeed;
 
+    [Header("입력 방향")]
     public Vector3 dir;
+    [Header("시점 방향")]
     public Vector3 lookDir;
 
+    [Header("렌더러 오브젝트")]
     public GameObject playerRenderer;
+    [Header("잔상 이펙트")]
     public GameObject afterImageEffect;
-
+    [Header("발 먼지 이펙트")]
     public string footStepDustEffectPrefab;
-
+    [Header("발 위치 트랜스폼")]
     public Transform footTransform;
+    [Header("발 먼지 생성 거리 비율")]
     public float stepDistance;
 
 
@@ -36,7 +50,9 @@ public class PlayerBehaviour : MonoBehaviour
 
     private float evasionDistance = 1f;
 
+    [Header("데미지 텍스트")]
     public string damageTextPrefab;
+    [Header("피격 이펙트")]
     public string damageEffect;
 
     private void Awake()
@@ -46,11 +62,12 @@ public class PlayerBehaviour : MonoBehaviour
         ri = GetComponent<Rigidbody2D>();
         sightChecker = GetComponentInChildren<SightChecker>();
         ani = playerRenderer.GetComponent<Animator>();
-        prop = GetComponent<PropBehaviour>();
+        propBehaviour = GetComponent<PropBehaviour>();
     }
 
     private void Start()
     {
+        hp = maxHp;
         StartCoroutine(DustEffect());
     }
 
@@ -113,6 +130,8 @@ public class PlayerBehaviour : MonoBehaviour
     public void Heal(int _value)
     {
         hp += _value;
+
+        hp = Mathf.Clamp(hp, 0, maxHp);
     }
 
     public void Damage(int _value)
@@ -135,11 +154,13 @@ public class PlayerBehaviour : MonoBehaviour
     public void Death()
     {
         state = PlayerState.Death;
+        ri.velocity = Vector2.zero;
         ani.SetTrigger("Death");
+        controller.isInput = false;
         //최근 세이브 포인트로 이동
         transform.position = SavePointManager.Instance.GetSavePoint().transform.position;
         Heal(10);
-        
+
     }
     #endregion
 
@@ -269,8 +290,12 @@ public class PlayerBehaviour : MonoBehaviour
 
     IEnumerator KnockBackEffect(float _power, Vector3 _dir)
     {
+        state = PlayerState.KnockBack;
+        print("knockBack");
+        controller.isInput = false;
         ri.velocity = Vector2.zero;
-        ri.drag = _power * 0.7f;
+        ri.drag = _power * 0.8f;
+
         ri.AddForce(_power * _dir, ForceMode2D.Impulse);
 
         while (ri.velocity.sqrMagnitude > 0.1f)
@@ -280,6 +305,8 @@ public class PlayerBehaviour : MonoBehaviour
 
         ri.drag = 0f;
         ri.velocity = Vector2.zero;
+        controller.isInput = true;
+        state = PlayerState.Idle;
         knockBack = null;
 
     }

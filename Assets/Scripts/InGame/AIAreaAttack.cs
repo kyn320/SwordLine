@@ -4,9 +4,13 @@ using UnityEngine;
 
 public class AIAreaAttack : AIAttack
 {
+    [Header("범위기 오브젝트")]
     public string areaObjectName;
+    [Header("캐스팅 시간")]
+    public float castTime = 1;
 
-    public float castTime;
+    [Header("타겟을 추적하는 공격")]
+    public bool isTargetAttack = false;
 
     public override void Attack()
     {
@@ -18,9 +22,13 @@ public class AIAreaAttack : AIAttack
         monster.UpdateState(MonsterState.Attack, true);
 
         GameObject g = ObjectPoolManager.Instance.Get(areaObjectName);
-        g.transform.position = transform.position;
 
-        g.GetComponent<AreaAttack>().Cast(castTime, attackTime);
+        if (isTargetAttack)
+            g.transform.position = target.position;
+        else
+            g.transform.position = transform.position;
+
+        g.GetComponent<AreaAttack>().Cast(castTime, attackTime, Damage);
 
         if (attackWaitTimer != null)
         {
@@ -41,4 +49,12 @@ public class AIAreaAttack : AIAttack
         monster.UpdateState(MonsterState.Attack, false);
         attackCurrentTime = 0;
     }
+
+    public override void Damage(GameObject _object)
+    {
+        PlayerBehaviour player = _object.GetComponent<PlayerBehaviour>();
+        player.Damage(monster.GetDamage());
+        player.KnockBack(knockBackPower, player.GetDirectionToVector3(transform.position));
+    }
+
 }

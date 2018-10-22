@@ -17,15 +17,12 @@ public class PropHologram : PropAttack
     {
         float hologramTime = 0.15f;
         yield return new WaitForSeconds(hologramTime);
-        float rand = Random.Range(0f, 1f) * 100;
-        float successPercent = prop.levelToPercent[weapon.propLevel];
 
-        if (rand <= successPercent)
+        if (RandomToPercent())
         {
             base.Attack(_monster);
             _monster.Damage((int)(weapon.OperateDamage() * prop.levelToMultipleDamage[weapon.propLevel]));
         }
+
     }
-
-
 }

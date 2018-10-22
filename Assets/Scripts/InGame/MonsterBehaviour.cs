@@ -4,23 +4,37 @@ using UnityEngine;
 
 public class MonsterBehaviour : MonoBehaviour
 {
+    [Header("공격력")]
+    public int damage;
+
+    [Header("현재 체력")]
     public int hp;
+    [Header("최대 체력")]
     public int maxHP;
 
+    [Header("몬스터 크기")]
+    public MonsterSizeType sizeType;
+    [Header("몬스터 상태")]
     public MonsterState state;
 
+    [Header("이동 속도")]
     public float moveSpeed = 1f;
 
+    [Header("무적 상태")]
     public bool isSuperPower = false;
 
+    [Header("렌더링 오브젝트")]
     public GameObject monsterRenderer;
     private SpriteRenderer spriteRenderer;
 
     private Animator ani;
     private MonsterAI ai;
     private Rigidbody2D ri;
+    private AIAttack aiAttack;
 
+    [Header("데미지 텍스트")]
     public string damageTextPrefab;
+
     private string damageEffect;
 
     private void Awake()
@@ -29,6 +43,7 @@ public class MonsterBehaviour : MonoBehaviour
         ai = GetComponent<MonsterAI>();
         ani = monsterRenderer.GetComponent<Animator>();
         spriteRenderer = monsterRenderer.GetComponent<SpriteRenderer>();
+        aiAttack = GetComponent<AIAttack>();
     }
 
     private void Start()
@@ -58,6 +73,7 @@ public class MonsterBehaviour : MonoBehaviour
                     ai.StopMovement();
                     state = MonsterState.Attack;
                     //TODO :: 공격 구현
+                    Attack();
                 }
                 else
                 {
@@ -69,8 +85,16 @@ public class MonsterBehaviour : MonoBehaviour
                 break;
             case MonsterState.Hacking:
                 state = MonsterState.Hacking;
-                //TODO :: 스턴 구현
                 ai.StopMovement();
+                switch (sizeType)
+                {
+                    case MonsterSizeType.Normal:
+                        Hacking(2f);
+                        break;
+                    case MonsterSizeType.Boss:
+                        Hacking(1f);
+                        break;
+                }
                 //TODO :: 스킬 사용 불가능
                 //TODO :: LED 보라색으로 변경
                 //TODO :: 해킹 이펙트 출력
@@ -109,7 +133,17 @@ public class MonsterBehaviour : MonoBehaviour
     public void Attack()
     {
         //TODO ::  공격 구현
+        aiAttack.SetTarget(ai.target);
+        aiAttack.Attack();
+        //ani.SetTrigger("Attack");
     }
+
+
+    public int GetDamage()
+    {
+        return damage;
+    }
+
     #endregion
 
     #region HP 제어
@@ -190,7 +224,12 @@ public class MonsterBehaviour : MonoBehaviour
 
     public void Hacking(float _hackingTime)
     {
+        print("Hacking");
 
+        if (hacking != null)
+            StopCoroutine(hacking);
+
+        hacking = StartCoroutine(HackingEffect(_hackingTime));
     }
 
     Coroutine hacking = null;
@@ -201,13 +240,13 @@ public class MonsterBehaviour : MonoBehaviour
 
         while (hackingTime > 0)
         {
-            //
+
             hackingTime -= Time.deltaTime;
             yield return null;
         }
 
         //TODO ::  일반 상태로 전환 
-
+        UpdateState(MonsterState.Idle);
     }
 
     #endregion
@@ -224,7 +263,11 @@ public class MonsterBehaviour : MonoBehaviour
             spriteRenderer.color = color;
             yield return null;
         }
+
+        gameObject.SetActive(false);
     }
+
+
 }
 
 public enum MonsterState
@@ -265,4 +308,16 @@ public enum MonsterState
     /// 사망 상태
     /// </summary>
     Death
+}
+
+public enum MonsterSizeType
+{
+    /// <summary>
+    /// 일반 몬스터
+    /// </summary>
+    Normal,
+    /// <summary>
+    /// 보스 몬스터
+    /// </summary>
+    Boss
 }

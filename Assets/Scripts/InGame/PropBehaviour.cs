@@ -18,11 +18,8 @@ public class PropBehaviour : MonoBehaviour
         {
             propChangeAction += renderers[i].SetPropColor;
         }
-    }
 
-    private void Start()
-    {
-        ChangeProp(PropDB.Instance.FindItem(PropType.Hologram));
+        ChangeProp(PropDB.Instance.FindItem(prop.type));
     }
 
     public void ChangeProp(Prop _prop)

@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Animator_Weapon_TwinSword
+  m_Controller: {fileID: 9100000, guid: 438beb753d626c84e9bd3ee795861a41, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: e0002d3e4bbd81e43a51ba97e0d3db16, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 664b50f1472cdc04d9473a8467ccd10e, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 1a37b244096bf66478af5f44d14d3031, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 67dc309d0f7c5574d9c56a3680b5e688, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: be034e160b1ff284eb13423362fb0afe, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 952fe22504b8f274485f2e746e7124ef, type: 2}

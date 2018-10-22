@@ -9,13 +9,16 @@ public class PlayerController : MonoBehaviour
 
     private float h, v;
 
+    [Header("입력 허용")]
     public bool isInput = true;
+    [Header("상호작용 여부")]
     public bool isInteracted = false;
 
+    [Header("무기 변경 쿨타임")]
     public float changeWeaponTime = 1.5f;
     private float changeWeaponCurrentTime;
 
-
+    [Header("회피 지속 시간")]
     public float evasionTime = 1.5f;
     private float evasionCurrentTime;
 
@@ -41,7 +44,7 @@ public class PlayerController : MonoBehaviour
             ////TODO :: 상호작용 구현
             //isInteracted = false;
             //player.UpdateState(PlayerState.Interactive);
-            player.GetSightChecker().recentSightInGameObject.GetComponent<InteractiveObject>().Interactive();
+            player.GetSightChecker().recentSightInGameObject.GetComponent<InteractiveObject>().Interactive(gameObject);
         }
 
         //무기체인지 처리

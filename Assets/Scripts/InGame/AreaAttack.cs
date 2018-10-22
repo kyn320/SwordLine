@@ -1,31 +1,45 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AreaAttack : MonoBehaviour
 {
-
+    private AttackCollider[] attackCollider;
+    private Animator ani;
     private SpriteRenderer spriteRenderer;
 
+    [Header("공격력")]
     public int damage;
 
-    public float castCurrentWaitTime;
+    private float castCurrentWaitTime;
+    [Header("캐스팅 시간")]
     public float castWaitTime;
 
-    public float attackCurrentWaitTime;
+    private float attackCurrentWaitTime;
+    [Header("공격 시간")]
     public float attackWaitTime;
 
-    public bool isStayAttack = false;
+    UnityAction<GameObject> damageAction;
 
     private void Awake()
     {
+        ani = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        attackCollider = GetComponentsInChildren<AttackCollider>();
     }
 
-    public void Cast(float _castTime, float _attackTime)
+    public void Cast(float _castTime, float _attackTime, UnityAction<GameObject> _damageAction)
     {
         castWaitTime = _castTime;
         attackWaitTime = _attackTime;
+
+        for (int i = 0; i < attackCollider.Length; ++i)
+        {
+            attackCollider[i].damageAction = _damageAction;
+        }
+
+        ani.SetTrigger("Cast");
 
         if (castWaitTimer != null)
             StopCoroutine(castWaitTimer);
@@ -52,6 +66,8 @@ public class AreaAttack : MonoBehaviour
 
     public void Attack()
     {
+        SetAttack(true);
+        ani.SetTrigger("Attack");
 
         if (castWaitTimer != null)
             StopCoroutine(attackWaitTimer);
@@ -73,6 +89,7 @@ public class AreaAttack : MonoBehaviour
             yield return null;
         }
 
+        SetAttack(false);
         attackCurrentWaitTime = 0;
         attackWaitTimer = null;
 
@@ -80,17 +97,12 @@ public class AreaAttack : MonoBehaviour
         ObjectPoolManager.Instance.Free(this.gameObject);
     }
 
-    private void OnTriggerEnter2D(Collider2D _collision)
+    public void SetAttack(bool _isAttack)
     {
-        //TODO :: 데미지 피해 입히기
-    }
-
-    private void OnTriggerStay2D(Collider2D _collision)
-    {
-        if (!isStayAttack)
-            return;
-
-        //TODO :: 데미지 피해 입히기
+        for (int i = 0; i < attackCollider.Length; ++i)
+        {
+            attackCollider[i].SetAttack(_isAttack);
+        }
     }
 
 }

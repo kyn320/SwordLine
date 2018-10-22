@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class AIBulletAttack : AIAttack
 {
-
+    [Header("투사체 오브젝트")]
     public string bulletObjectName;
-
+    [Header("투사체 이동 속도")]
     public float bulletSpeed = 1f;
-    public Vector3 aimPosition;
 
     public override void Attack()
     {
@@ -22,8 +21,8 @@ public class AIBulletAttack : AIAttack
         GameObject g = ObjectPoolManager.Instance.Get(bulletObjectName);
         g.transform.position = transform.position;
 
-        Vector3 dir = transform.position - aimPosition;
-        g.GetComponent<Bullet>().SetBullet(dir.normalized, bulletSpeed);
+        Vector3 dir = target.position - transform.position;
+        g.GetComponent<Bullet>().SetBullet(dir.normalized, bulletSpeed, Damage);
 
         if (attackWaitTimer != null)
         {
@@ -44,5 +43,14 @@ public class AIBulletAttack : AIAttack
         monster.UpdateState(MonsterState.Attack, false);
         attackCurrentTime = 0;
     }
+
+    public override void Damage(GameObject _object)
+    {
+        PlayerBehaviour player = _object.GetComponent<PlayerBehaviour>();
+        player.Damage(monster.GetDamage());
+        player.KnockBack(knockBackPower, player.GetDirectionToVector3(transform.position));
+    }
+
+
 
 }

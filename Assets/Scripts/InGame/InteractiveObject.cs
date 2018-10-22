@@ -5,7 +5,10 @@ using UnityEngine.Events;
 
 public class InteractiveObject : MonoBehaviour
 {
+    [Header("상호 작용 시 이벤트 목록")]
     public UnityEvent interactiveEvent;
+
+    public UnityAction<GameObject> interactiveEventToGameObject;
 
     public void Interactive()
     {
@@ -13,9 +16,16 @@ public class InteractiveObject : MonoBehaviour
             interactiveEvent.Invoke();
     }
 
-    public void PrintObjectName()
+    public void Interactive(GameObject _object)
     {
-        Debug.Log("Interactive Action : :" + gameObject.name);
+
+        if (interactiveEvent != null)
+            interactiveEvent.Invoke();
+
+        if (interactiveEventToGameObject != null)
+            interactiveEventToGameObject.Invoke(_object);
     }
+
+
 
 }

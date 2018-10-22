@@ -44,7 +44,6 @@ public class MonsterAI : EntityAI
             if ((orignSpawnPoint - transform.position).sqrMagnitude <= 0.1f)
             {
                 monster.UpdateState(MonsterState.End);
-                print("리스폰 도착");
                 break;
             }
         }
@@ -63,16 +62,18 @@ public class MonsterAI : EntityAI
 
             float targetDistance = (target.position - transform.position).sqrMagnitude;
 
-            //            print("거리 = " + targetDistance);
+//                      print("거리 = " + targetDistance);
 
             if (monster.state == MonsterState.Attack)
             {
-                if (targetDistance > attackDistance * attackDistance)
-                {
-                    //                    print("공격 이후 재 추격");
-                    monster.UpdateState(MonsterState.Trace);
-                    RestartMovement();
-                }
+                yield return null;
+                continue;
+//                if (targetDistance > attackDistance * attackDistance)
+//                {
+//                    //                    print("공격 이후 재 추격");
+//                    monster.UpdateState(MonsterState.Trace);
+//                    RestartMovement();
+//                }
             }
 
             if (target != null)
