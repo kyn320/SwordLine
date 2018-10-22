@@ -19,6 +19,10 @@ public class PropBehaviour : MonoBehaviour
             propChangeAction += renderers[i].SetPropColor;
         }
 
+    }
+
+    private void Start()
+    {
         ChangeProp(PropDB.Instance.FindItem(prop.type));
     }
 

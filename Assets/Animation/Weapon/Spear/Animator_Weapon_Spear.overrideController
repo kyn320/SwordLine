@@ -7,4 +7,10 @@ AnimatorOverrideController:
   m_PrefabInternal: {fileID: 0}
   m_Name: Animator_Weapon_Spear
   m_Controller: {fileID: 9100000, guid: 438beb753d626c84e9bd3ee795861a41, type: 2}
-  m_Clips: []
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: e0002d3e4bbd81e43a51ba97e0d3db16, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 9c9e88e13e01ca8409f9232da714ce0b, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 1a37b244096bf66478af5f44d14d3031, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 95077564fa685ae4a925e75f9f6fa2a2, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: be034e160b1ff284eb13423362fb0afe, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: abbbcdb5465a07e449bb6e0c5b25f5f9, type: 2}
